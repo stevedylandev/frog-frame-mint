@@ -1,8 +1,8 @@
 /** @jsxImportSource frog/jsx */
 
-import { Button, Frog } from 'frog'
+import { Button, Frog, parseEther } from 'frog'
 import { handle } from 'frog/next'
-import { abi } from './abi.json'
+import abi from './abi.json'
 
 const app = new Frog({
   assetsPath: '/',
@@ -15,36 +15,59 @@ const app = new Frog({
 app.frame('/', (c) => {
   return c.res({
     action: '/finish',
-    image: (
-      <div style={{ color: 'white', display: 'flex', fontSize: 60 }}>
-        Perform a transaction
-      </div>
-    ),
+    image: "https://dweb.mypinata.cloud/ipfs/QmeC7uQZqkjmc1T6sufzbJWQpoeoYjQPxCXKUSoDrXfQFy",
+    imageAspectRatio: '1:1',
     intents: [
-      <Button.Transaction target="/mint">Mint</Button.Transaction>,
+      <Button.Transaction target="/buy">Buy for 0.005 ETH</Button.Transaction>,
+      <Button action="/ad">Watch ad for 1/2 off</Button>
     ]
   })
 })
  
 app.frame('/finish', (c) => {
-  const { transactionId } = c
   return c.res({
-    image: (
-      <div style={{ color: 'white', display: 'flex', fontSize: 60 }}>
-        Transaction ID: {transactionId}
-      </div>
-    )
+    image: "https://dweb.mypinata.cloud/ipfs/QmZPysm8ZiR9PaNxNGQvqdT2gBjdYsjNskDkZ1vkVs3Tju",
+    imageAspectRatio: '1:1',
+    intents: [
+      <Button.Link href='https://pinata.cloud'>Learn More</Button.Link>
+    ]
   })
 })
- 
- 
-app.transaction('/mint', (c) => {
+
+app.frame('/ad', (c) => {
+  // action goes here
+  console.log('nft minted')
+  return c.res({
+    action: '/finish',
+    image: "https://dweb.mypinata.cloud/ipfs/QmaQC9shWhLWQiBuWNa2YGUFARekj5Qm7iCE59H4FzeSi4", 
+    imageAspectRatio: '1:1',
+    intents: [
+      <Button.Transaction target="/buy-discount">Buy for 0.0025 ETH</Button.Transaction>,
+    ]
+  })
+})
+
+
+app.transaction('/buy-discount', (c) => {
   return c.contract({
-    abi,
-    chainId: 'eip155:84532',
-    functionName: 'mint',
-    args: ["0xaD73eafCAc4F4c6755DFc61770875fb8B6bC8A25"],
+    abi: abi.abi,
+    chainId: 'eip155:8453',
+    functionName: 'buyHat',
+    args: [c.frameData?.fid || 0],
     to: '0x893af2c848edc36f95d0fbd85a409c3191ddb0b8',
+    value: parseEther('0.0025')
+  })
+})
+
+ 
+app.transaction('/buy', (c) => {
+  return c.contract({
+    abi: abi.abi,
+    chainId: 'eip155:8453',
+    functionName: 'buyHat',
+    args: [c.frameData?.fid || 0],
+    to: '0x893af2c848edc36f95d0fbd85a409c3191ddb0b8',
+    value: parseEther('0.005')
   })
 })
 
